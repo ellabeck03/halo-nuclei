@@ -1,0 +1,3 @@
+Use our established method to get a fit (10 gaussians? Can be adjusted) (make sure it also works for the S orbital state that has no spin orbit coupling)
+Produce Log plots to show goodness of fit, also look at the mathmatica notebook Jagjit showed us for ideas
+Use these to get the ground state energies using out tuned parameters (and also present the paper with them in?).
