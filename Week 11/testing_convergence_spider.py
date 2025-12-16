@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Tue Dec 16 10:09:06 2025
 
@@ -234,11 +235,19 @@ be_11_rms_matter_radius = rms_matter_radius(s1_average_radius)
 print(f'found matter radius of Be 11 is {be_11_rms_matter_radius:.3f} fm')
 
 
+
+
 num_gaussians = np.linspace(2, 101, 100)
+print(num_gaussians)
 one_s_energies = []
 one_s_eigenvectors = []
 condition_numbers = []
 rms_values = []
+
+one_s_energies_2 = []
+one_s_eigenvectors_2 = []
+condition_numbers_2 = []
+rms_values_2 = []
 
 for i in enumerate(num_gaussians):
    # ending_range_parameter = ENDING_RANGE_PARAMETER * + (0.1 * i[1]) - 4
@@ -258,25 +267,50 @@ for i in enumerate(num_gaussians):
     one_s_energies.append(s_eigenvalues[1])
     one_s_eigenvectors.append(s_eigenvectors[:, 1])
     rms_values.append(be_11_rms_matter_radius)
-print(num_gaussians[38], one_s_energies[38], rms_values[38])
+    
+for i in enumerate(num_gaussians):
+   # ending_range_parameter = ENDING_RANGE_PARAMETER * + (0.1 * i[1]) - 4
+    s_h_matrix_2, s_n_matrix_2 = matrix_generation(
+        0.5, 0, ENDING_RANGE_PARAMETER+5000000, size=int(i[1]))
+    s_eigenvalues_2, s_eigenvectors_2 = scipy.linalg.eigh(s_h_matrix_2, s_n_matrix_2)
+    s_overlap_eigenvalues_2, s_overlap_eigenvectors_2 = scipy.linalg.eigh(
+        s_n_matrix_2)
+    s_overlap_matrix_condition_number_2 = np.max(
+        s_overlap_eigenvalues_2) / np.min(s_overlap_eigenvalues_2)
 
-fig = plt.figure(figsize=[10, 6])
+    s1_average_radius_2 = poisition_operator(
+        0, np.asarray(s_eigenvectors_2[:, 1]), int(i[1]))
+    be_11_rms_matter_radius_2 = rms_matter_radius(s1_average_radius_2)
+
+    condition_numbers_2.append(s_overlap_matrix_condition_number)
+    one_s_energies_2.append(s_eigenvalues[1])
+    one_s_eigenvectors_2.append(s_eigenvectors[:, 1])
+    rms_values_2.append(be_11_rms_matter_radius_2)
+print(num_gaussians[38], one_s_energies_2[38], rms_values_2[38])
+
+fig = plt.figure(figsize=[20, 10])
 spec = fig.add_gridspec(ncols=2, nrows=1)
 ax_1 = fig.add_subplot(spec[0, 0])
 ax_2 = fig.add_subplot(spec[0, 1])
-ax_1.plot(num_gaussians, rms_values, marker='+')
-ax_1.axhline(2.972, label='true ground state energy', color='r')
+ax_1.plot(num_gaussians, rms_values, marker='+', color = 'darkblue', label='Two-body model estimate')
+ax_1.axhline(2.972, label='True r.m.s radius', color='firebrick')
 
-ax_1.set_xlabel('number of gaussians')
-ax_1.set_ylabel('ground state energy estimation')
-ax_1.legend()
+ax_1.set_xlabel('Number of basis functions', fontsize=16)
+ax_1.set_ylabel('r.m.s radius [fm]', fontsize=16)
+ax_1.set_title('Smaller radial spacing', fontsize=20)
+ax_1.tick_params(axis='y', labelsize=16) 
+ax_1.tick_params(axis='x', labelsize=16) 
+ax_1.legend(fontsize=16)
 
-ax_2.plot(num_gaussians[2:], one_s_energies[2:], marker='+')
-ax_2.axhline(-0.5044, label='true ground state energy', color='r')
+ax_2.plot(num_gaussians[2:], rms_values_2[2:], marker='+', color='darkblue', label='Two-body model estimate')
+ax_2.axhline(-0.5044, label='True r.m.s. radius', color='firebrick')
 
-ax_2.set_xlabel('number of gaussians')
-ax_2.set_ylabel('ground state energy estimation')
-ax_2.legend()
+ax_2.set_xlabel('Number of basis functions',fontsize=16)
+ax_2.set_ylabel('Ground state energy [MeV]', fontsize=16)
+ax_2.set_title('Larger radial spacing', fontsize=20)
+ax_2.tick_params(axis='y', labelsize=16) 
+ax_2.tick_params(axis='x', labelsize=16) 
+ax_2.legend(fontsize=16)
 
-plt.savefig('thingy.png')
+plt.savefig('testing_convergence.png')
 plt.show()
